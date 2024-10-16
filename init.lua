@@ -24,23 +24,33 @@ vim.opt.rtp:prepend(lazypath)
 -- Install Essential Plugins
 -- ============================================
 require("lazy").setup({
-  -- Core LSP and autocompletion
-  "neovim/nvim-lspconfig",    -- Enables LSP (Language Server Protocol) for coding assistance
-  "hrsh7th/nvim-cmp",         -- Main plugin for autocompletion
-  "hrsh7th/cmp-nvim-lsp",     -- Connects LSP with nvim-cmp for suggestions
-  "L3MON4D3/LuaSnip",         -- Snippet engine for coding shortcuts
-  "saadparwaiz1/cmp_luasnip", -- Integrates LuaSnip with nvim-cmp for autocompletion
+  -- LSP and autocompletion
+  "neovim/nvim-lspconfig",    -- Enables LSP support for coding assistance
+  "hrsh7th/nvim-cmp",         -- Completion plugin for autocompletion
+  "hrsh7th/cmp-nvim-lsp",     -- Connects LSP with nvim-cmp for autocompletion
+  "L3MON4D3/LuaSnip",         -- Snippet engine for reusable code snippets
+  "saadparwaiz1/cmp_luasnip", -- Integrates LuaSnip with nvim-cmp
 
   -- Language-specific support
-  "rust-lang/rust.vim", -- Rust-specific features
-  "fatih/vim-go",       -- Go-specific features
+  "rust-lang/rust.vim",      -- Rust-specific features
+  "fatih/vim-go",            -- Go-specific features
+
+  -- Syntax highlighting and code navigation
+  {                          -- nvim-treesitter for better syntax highlighting
+    "nvim-treesitter/nvim-treesitter",
+    run = ":TSUpdate"        -- Automatically update treesitter parsers
+  },
 
   -- Code linting and formatting
-  "jose-elias-alvarez/null-ls.nvim", -- Integrates linters and formatters with LSP
+  "jose-elias-alvarez/null-ls.nvim", -- Integrates formatters and linters with LSP
+
+  -- File searching and fuzzy finding
+  "nvim-telescope/telescope.nvim", -- Fuzzy finder for files, buffers, and more
+  "nvim-lua/plenary.nvim",          -- Required dependency for telescope
 
   -- Git integration
   "tpope/vim-fugitive",      -- Simplifies Git commands within Neovim
-  "lewis6991/gitsigns.nvim", -- Shows git changes in the sign column
+  "lewis6991/gitsigns.nvim", -- Shows git changes directly in the sign column
 
   -- File explorer for managing files and directories
   "nvim-tree/nvim-tree.lua",
@@ -53,8 +63,14 @@ require("lazy").setup({
   "nvim-lualine/lualine.nvim", -- Customizable status line at the bottom
   "akinsho/bufferline.nvim",   -- Displays open buffers/tabs
 
+  -- Autopairs for automatic closing of brackets and quotes
+  "windwp/nvim-autopairs",
+
+  -- Commenting plugin for easily commenting code
+  "numToStr/Comment.nvim",
+
   -- Debugging tools
-  "mfussenegger/nvim-dap", -- Interface for debugging
+  "mfussenegger/nvim-dap", -- Interface for debugging support
 })
 
 -- ============================================
@@ -63,13 +79,13 @@ require("lazy").setup({
 local lspconfig = require('lspconfig')
 
 -- Example LSP configurations for different languages
-lspconfig.ts_ls.setup {}         -- LSP for JavaScript/TypeScript
-lspconfig.gopls.setup {}         -- LSP for Go
-lspconfig.pyright.setup {}       -- LSP for Python
-lspconfig.rust_analyzer.setup {} -- LSP for Rust
-lspconfig.clangd.setup {}        -- LSP for C/C++
-lspconfig.html.setup {}          -- LSP for HTML
-lspconfig.cssls.setup {}         -- LSP for CSS
+lspconfig.ts_ls.setup {}      -- JavaScript and TypeScript support
+lspconfig.gopls.setup {}         -- Go support
+lspconfig.pyright.setup {}       -- Python support
+lspconfig.rust_analyzer.setup {} -- Rust support
+lspconfig.clangd.setup {}        -- C/C++ support
+lspconfig.html.setup {}          -- HTML support
+lspconfig.cssls.setup {}         -- CSS support
 
 -- Enable built-in syntax highlighting
 vim.cmd('syntax on')
@@ -143,6 +159,16 @@ null_ls.setup({
 })
 
 -- ============================================
+-- Treesitter Configuration for Syntax Highlighting
+-- ============================================
+require('nvim-treesitter.configs').setup {
+  ensure_installed = { "javascript", "typescript", "go", "python", "rust", "c", "cpp", "html", "css", "markdown" },
+  highlight = {
+    enable = true, -- Enable treesitter-based highlighting
+  },
+}
+
+-- ============================================
 -- Theme Configuration
 -- ============================================
 vim.cmd [[colorscheme tokyonight]] -- Set the colorscheme (change to 'gruvbox' if preferred)
@@ -151,11 +177,21 @@ vim.cmd [[colorscheme tokyonight]] -- Set the colorscheme (change to 'gruvbox' i
 -- Key Mappings for Ease of Use
 -- ============================================
 
--- Key mapping to toggle the file explorer with Ctrl + B
-vim.api.nvim_set_keymap('n', '<C-b>', ':NvimTreeToggle<CR>', { noremap = true })
+-- Toggle the file explorer with Ctrl + B
+vim.api.nvim_set_keymap('n', '<C-b>', ':NvimTreeToggle<CR>', { noremap = true, silent = true })
 
--- Key mapping to open a terminal with Ctrl + T
-vim.api.nvim_set_keymap('n', '<C-t>', ':terminal<CR>', { noremap = true })
+-- Open a terminal with Ctrl + T
+vim.api.nvim_set_keymap('n', '<C-t>', ':terminal<CR>', { noremap = true, silent = true })
 
--- Key mapping to open file finder using Telescope with <leader> + f
-vim.api.nvim_set_keymap('n', '<leader>f', ':Telescope find_files<CR>', { noremap = true })
+-- Open file finder using Telescope with <leader> + f
+vim.api.nvim_set_keymap('n', '<leader>f', ':Telescope find_files<CR>', { noremap = true, silent = true })
+
+-- ============================================
+-- Autopairs Configuration
+-- ============================================
+require('nvim-autopairs').setup() -- Automatically close brackets and quotes
+
+-- ============================================
+-- Commenting Configuration
+-- ============================================
+require('Comment').setup() -- Enable commenting with `gcc` for line comments
